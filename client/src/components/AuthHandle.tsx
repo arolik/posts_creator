@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import Register from './RegisterModal';
 import Login from './LoginModal';
 
-const AuthHandle:React.FC = ({}) => {
+const AuthHandle:React.FC = () => {
 
     const [isLogin, setLogin] = useState(false);
-    const [isRegisterActive, setRegisterActive] = useState(false);
-    const [isLoginActive, setLoginActive] = useState(false);
-
+    const [isActiveRegisterModal, setActiveRegisterModal] = useState(false);
+    const [isActiveLoginModal, setActiveLoginModal] = useState(false);
+    
+    
     return (
         <React.Fragment>
         {
@@ -19,16 +20,16 @@ const AuthHandle:React.FC = ({}) => {
             </Box>
             :
             <Box>
-                <Button color='inherit'>Register</Button>
-                <Button color='inherit'>Login</Button>
+                <Button color='inherit' onClick={ () => {setActiveRegisterModal(true)} } >Register</Button>
+                <Button color='inherit' onClick ={ () => {setActiveLoginModal(true)} } >Login</Button>
             </Box>
             
         }
         {
-            isRegisterActive && <Register />
+            isActiveRegisterModal && <Register isOpen={isActiveRegisterModal} setOpen={setActiveRegisterModal} />
         }
         {
-            isLoginActive && <Login />
+            isActiveLoginModal && <Login isOpen={isActiveLoginModal} setOpen={setActiveLoginModal} />
         }
         </React.Fragment>
     )

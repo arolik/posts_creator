@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box'
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import AuthHandle from './AuthHandle';
@@ -6,7 +6,7 @@ import AuthHandle from './AuthHandle';
 const Header = () => {
 
     return (
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1}}>
             <AppBar position='static'>
                 <Toolbar sx={{ justifyContent: 'space-between' }}>
                     <Box >
