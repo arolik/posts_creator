@@ -1,20 +1,24 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, Switch, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import React, { useState } from 'react';
-import { RegisterPropsModalI } from "../interfaces/common";
+import { IFormValues, IRegisterPropsModal } from "../interfaces/common";
 import { useAppDispatch } from "../redux/hooks";
 import { registerUserThunk } from "../redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 
 
-const Register: React.FC<RegisterPropsModalI> = ({ isOpen, setOpen }) => {
+const Register: React.FC<IRegisterPropsModal> = ({ isOpen, setOpen }) => {
 
     const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
+    const { handleSubmit, control, formState: { errors } } = useForm<IFormValues>();
 
-    function handleSubmit() {
-        dispatch(registerUserThunk({username, password}))
+    const handleRegisterData: SubmitHandler<IFormValues> = (data) => {
+        dispatch(registerUserThunk({username: data.login, password: data.password}));
+        navigate('/')
+        setOpen(false);
     }
 
     return (
@@ -29,14 +33,36 @@ const Register: React.FC<RegisterPropsModalI> = ({ isOpen, setOpen }) => {
             </DialogTitle>
             <Divider />
             <DialogContent>
-                <form>
-                    <TextField label="Login" type="text" fullWidth sx={{ margin: '0.5rem 0' }}
-                        value={username} autoComplete="username"
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setUsername(event.target.value) }}
+                <form onSubmit={handleSubmit(handleRegisterData)} >
+                    <Controller
+                        name="login"
+                        control={control}
+                        defaultValue=""
+                        rules={{ required: 'Login must be to type', minLength: { value: 3, message: 'Login must be min 3 characters' },}}
+                        render={({ field }) => (
+                            <TextField label="Login" type="text" placeholder="Login" fullWidth sx={{ margin: '0.5rem 0' }}
+                                autoComplete="username"
+                                onChange={(event) => { field.onChange(event) }}
+                                value={field.value}
+                                error={!!errors.login?.message}
+                                helperText={errors.login?.message}
+                            />
+                        )}
                     />
-                    <TextField label="Password" type={showPassword ? 'text' : 'password'} fullWidth sx={{ margin: '0.5rem 0' }}
-                        value={password} autoComplete="current-password"
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setPassword(event.target.value) }}
+                    <Controller
+                        name="password"
+                        control={control}
+                        defaultValue=""
+                        rules={{ required: 'Password must be to type', minLength: { value: 3, message: 'Password must be min 3 characters' } }}
+                        render={({ field }) => (
+                            <TextField label="Password" type={showPassword ? 'text' : 'password'} placeholder="Password"
+                                fullWidth sx={{ margin: '0.5rem 0' }} autoComplete="current-password"
+                                onChange={(event) => { field.onChange(event) }}
+                                value={field.value}
+                                error={!!errors.password?.message}
+                                helperText={errors.password?.message}
+                            />
+                        )}
                     />
                     <FormControl>
                         <FormControlLabel
@@ -45,7 +71,7 @@ const Register: React.FC<RegisterPropsModalI> = ({ isOpen, setOpen }) => {
                         />
                     </FormControl>
                     <DialogActions>
-                        <Button onClick={handleSubmit}>Register</Button>
+                        <Button type="submit" >Register</Button>
                         <Button onClick={() => { setOpen(false) }}>Cancel</Button>
                     </DialogActions>
                 </form>

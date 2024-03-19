@@ -1,19 +1,26 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { LoginPropsModalI } from "../interfaces/common";
+import { IFormValues, ILoginPropsModal } from "../interfaces/common";
 import { useAppDispatch } from "../redux/hooks";
 import { loginUserThunk } from "../redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 
 
-const Login: React.FC<LoginPropsModalI> = ({ isOpen, setOpen }) => {
+const Login: React.FC<ILoginPropsModal> = ({ isOpen, setOpen }) => {
 
     const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
-    function handleSubmit () {
-        dispatch(loginUserThunk({username, password}))
+    const { control, handleSubmit, formState: { errors } } = useForm<IFormValues>();
+
+
+    const handleLoginData: SubmitHandler<IFormValues> = (data) => {
+        dispatch(loginUserThunk({username: data.login, password: data.password}))
+        navigate('/');
+        setOpen(false);
+        console.log(data)
     }
 
     return (
@@ -28,14 +35,36 @@ const Login: React.FC<LoginPropsModalI> = ({ isOpen, setOpen }) => {
             </DialogTitle>
             <Divider />
             <DialogContent>
-                <form>
-                    <TextField label="login" type="text" fullWidth sx={{ margin: '0.5rem 0' }} 
-                    value={username} autoComplete="username"
-                    onChange={ (event: React.ChangeEvent<HTMLInputElement>) => { setUsername(event.target.value) } }
+                <form onSubmit={handleSubmit(handleLoginData)} >
+                    <Controller 
+                        control={control}
+                        name="login"
+                        defaultValue=""
+                        rules={{ required: 'Login must be to type', minLength: { value: 3, message: 'Login must be min 3 characters' } }}
+                        render={({field}) => (
+                            <TextField label="Login" type="text" placeholder="Login" fullWidth sx={{ margin: '0.5rem 0' }} 
+                            autoComplete="username"
+                            onChange={(event) => {field.onChange(event)}}
+                            value={field.value}
+                            error={!!errors.login?.message}
+                            helperText={errors.login?.message}
+                            />
+                        )}
                     />
-                    <TextField label="password" type={showPassword ? 'text' : 'password' } fullWidth sx={{ margin: '0.5rem 0' }}
-                    value={password} autoComplete="current-password"
-                    onChange={ (event: React.ChangeEvent<HTMLInputElement>) => { setPassword(event.target.value) } }
+                    <Controller
+                        control={control}
+                        name="password"
+                        defaultValue=""
+                        rules={{ required: 'Password must be to type', minLength: { value: 3, message: 'Password must be min 3 characters' } }}
+                        render={({field}) => (
+                            <TextField label="password" type={showPassword ? 'text' : 'password' } fullWidth sx={{ margin: '0.5rem 0' }}
+                            autoComplete="current-password"
+                            onChange={(event) => {field.onChange(event)}}
+                            value={field.value}
+                            error={!!errors.password?.message}
+                            helperText={errors.password?.message}
+                            />
+                        )}
                     />
                     <FormControl>
                         <FormControlLabel 
@@ -44,7 +73,7 @@ const Login: React.FC<LoginPropsModalI> = ({ isOpen, setOpen }) => {
                         />
                     </FormControl>
                     <DialogActions>
-                        <Button onClick={handleSubmit}>Login</Button>
+                        <Button type="submit" >Login</Button>
                         <Button onClick={ () => { setOpen(false) } }>Cancel</Button>
                     </DialogActions>
                 </form>
