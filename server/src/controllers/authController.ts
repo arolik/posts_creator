@@ -32,7 +32,7 @@ export const registerUser = async (request: Request, response: Response) => {
         )
         await user.save();
         response.json({
-            name: user.username,
+            user,
             token,
             message: 'your register was succesfull'
         })
@@ -76,6 +76,35 @@ export const loginUser = async (request: Request, response: Response) => {
 
     } catch (error) {
         response.json({message: 'login mistake, try again'})
+    }
+}
+
+export const getMe = async (request: any, response: Response) => {
+    try {
+        const userId = request.userId;
+        const user = await User.findById(userId)
+        if(!user){
+            return response.json({message: 'such user is not exist'})
+        }
+
+        const token = jwt.sign(
+            {
+                id: user._id
+            },
+            'secretKey',
+            {
+                expiresIn: '30d'
+            }
+        )
+
+        response.json({
+            user,
+            token,
+            message: 'you entered to your account',
+        })
+
+    } catch (error) {
+        return response.json({message: 'can not load a page'})
     }
 }
 
